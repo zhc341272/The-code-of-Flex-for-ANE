@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" creationComplete="onCreationComplete(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.Dsideal.Event.ANELibUtilsEvent;
+			import com.Dsideal.MicroANEforiOS.ANELibUtils;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.Alert;
+			import spark.components.Button;
+			
+			private var _ane:ANELibUtils;//调取的ANE
+			
+			private var _btnOpencamera:Button;//打开摄像头
+			private var _btnOpenVideo:Button;//打开已经拍摄好的视频
+			private var _btnOpenVideoGel:Button;//打开图片库，筛选出来视频
+			
+			/**
+			 * [功能]：构建整个界面
+			 */
+			protected function onCreationComplete(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				SetBtnsToUse();
+			}
+			
+			/**
+			 * [功能]：配置打开摄像头以及播放视频的按钮
+			 */
+			 private function SetBtnsToUse():void
+			{
+				_ane = new ANELibUtils();
+				_ane.addEventListener(ANELibUtilsEvent.FinishPickedVideo, onFinishOpenVideo);
+				
+				_btnOpencamera = new Button();
+				_btnOpencamera.x = 20;
+				_btnOpencamera.y = 150;
+				_btnOpencamera.label = "OpenCamera";
+				_btnOpencamera.addEventListener(MouseEvent.CLICK, onClickOpenCamera);
+				this.addElement(_btnOpencamera);
+				
+				_btnOpenVideo = new Button();
+				_btnOpenVideo.x = 250;
+				_btnOpenVideo.y = 150;
+				_btnOpenVideo.label = "OpenVideo";
+				_btnOpenVideo.addEventListener(MouseEvent.CLICK, onClickOpenVideo);
+				this.addElement(_btnOpenVideo);
+				
+				_btnOpenVideoGel = new Button();
+				_btnOpenVideoGel.x = 20;
+				_btnOpenVideoGel.y = 300;
+				_btnOpenVideoGel.label = "OpenViewGel";
+				_btnOpenVideoGel.addEventListener(MouseEvent.CLICK, onClickOpenVideoGel);
+				this.addElement(_btnOpenVideoGel);
+			}
+			
+			/**
+			 * [功能]：点击打开摄像头自后进行的函数
+			 */
+			protected function onClickOpenCamera(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if (CameraUI.isSupported)
+				{//如果摄像头功能是可以使用的
+					var _cameraUI:CameraUI = new CameraUI();
+					_cameraUI.launch(MediaType.VIDEO);//录像模式
+					_cameraUI.addEventListener(MediaEvent.COMPLETE, onVideoComplete);
+				}
+				else
+				{
+					Alert.show("摄像头功能无法启用！", "提示");
+				}
+			}
+			
+			/**
+			 * [功能]：点击打开微课之后进行的函数
+			 */
+			protected function onClickOpenVideo(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var _videoPath:String = File.documentsDirectory.nativePath + "/Video/bata.mov";
+				
+				_ane.PlayVideo(_videoPath);
+			}
+			
+			/**
+			 * [功能]：摄像头录制完视频之后进行的函数
+			 */
+			protected function onVideoComplete(event:MediaEvent):void
+			{
+				// TODO Auto-generated method stub
+				event.data.file.copyTo(new File(File.documentsDirectory.nativePath + "/Video/bata.mov"), true);
+				event.data.file.deleteFile();//必须删除
+			}
+			
+			/**
+			 * ［功能］：打开本地视频库，选取视频文件
+			 */
+			protected function onClickOpenVideoGel(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				_ane.OpenVideoGel();
+				
+			}
+			
+			/**
+			 * [功能]：用户选取完视频之后进行的函数
+			 */
+			protected function onFinishOpenVideo(event:ANELibUtilsEvent):void
+			{
+				// TODO Auto-generated method stub
+				trace(event._videoPath);//输出文件路径
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:View>
